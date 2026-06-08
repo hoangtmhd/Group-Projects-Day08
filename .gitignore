@@ -29,8 +29,3 @@ evaluation_results/
 .idea/
 *.swp
 *.swo
-
-# Sub-directory envs
-**/2A202600619-NguyenHuuThaiMinh-Day08/.env
-**/2A202600619-NguyenHuuThaiMinh-Day08/__pycache__/
-**/2A202600619-NguyenHuuThaiMinh-Day08/data/chroma_db/

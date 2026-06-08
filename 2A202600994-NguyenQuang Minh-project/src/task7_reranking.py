@@ -10,7 +10,7 @@ Nếu dùng MMR hoặc RRF, đảm bảo hiểu và giải thích được cơ c
 """
 
 import os
-import google.generativeai as genai
+from openai import OpenAI
 from dotenv import load_dotenv
 from rank_bm25 import BM25Okapi
 
@@ -42,22 +42,20 @@ def rerank_cross_encoder(
         return []
 
     load_dotenv()
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     # 1. Xếp hạng theo ngữ nghĩa (Semantic Ranking)
-    q_res = genai.embed_content(
-        model="models/gemini-embedding-2",
-        content=query,
-        task_type="retrieval_query"
+    q_res = client.embeddings.create(
+        input=[query],
+        model="text-embedding-3-small"
     )
-    query_embedding = q_res["embedding"]
+    query_embedding = q_res.data[0].embedding
 
-    c_res = genai.embed_content(
-        model="models/gemini-embedding-2",
-        content=[c["content"] for c in candidates],
-        task_type="retrieval_document"
+    c_res = client.embeddings.create(
+        input=[c["content"] for c in candidates],
+        model="text-embedding-3-small"
     )
-    candidate_embeddings = c_res["embedding"]
+    candidate_embeddings = [data.embedding for data in c_res.data]
 
     semantic_scores = [cosine_sim(query_embedding, c_emb) for c_emb in candidate_embeddings]
     semantic_ranked = sorted(
@@ -125,14 +123,13 @@ def rerank_mmr(
     missing_embs = [i for i, c in enumerate(candidates) if "embedding" not in c or c["embedding"] is None]
     if missing_embs:
         load_dotenv()
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        c_res = genai.embed_content(
-            model="models/gemini-embedding-2",
-            content=[candidates[i]["content"] for i in missing_embs],
-            task_type="retrieval_document"
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        c_res = client.embeddings.create(
+            input=[candidates[i]["content"] for i in missing_embs],
+            model="text-embedding-3-small"
         )
-        for idx, emb in zip(missing_embs, c_res["embedding"]):
-            candidates[idx]["embedding"] = emb
+        for idx, data in zip(missing_embs, c_res.data):
+            candidates[idx]["embedding"] = data.embedding
 
     selected = []
     remaining = list(range(len(candidates)))
@@ -227,13 +224,12 @@ def rerank(
         return rerank_cross_encoder(query, candidates, top_k)
     elif method == "mmr":
         load_dotenv()
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        q_res = genai.embed_content(
-            model="models/gemini-embedding-2",
-            content=query,
-            task_type="retrieval_query"
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        q_res = client.embeddings.create(
+            input=[query],
+            model="text-embedding-3-small"
         )
-        query_embedding = q_res["embedding"]
+        query_embedding = q_res.data[0].embedding
         return rerank_mmr(query_embedding, candidates, top_k)
     elif method == "rrf":
         # RRF cần nhiều ranked lists. Nếu input là danh sách các danh sách:
