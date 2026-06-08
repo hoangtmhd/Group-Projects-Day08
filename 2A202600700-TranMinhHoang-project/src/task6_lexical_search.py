@@ -15,33 +15,25 @@ BM25 hoạt động thế nào:
     - k1=1.5 (term saturation), b=0.75 (length normalization)
 """
 
-from pathlib import Path
+import weaviate
+from weaviate.classes.query import MetadataQuery
 
-# TODO: Load corpus từ data/standardized/ hoặc từ vector store
+# CORPUS không cần thiết cho phương pháp Weaviate BM25 built-in, 
+# nhưng chúng ta khai báo để giữ tương thích.
 CORPUS: list[dict] = []  # List of {'content': str, 'metadata': dict}
 
 
 def build_bm25_index(corpus: list[dict]):
     """
     Xây dựng BM25 index từ corpus.
-
-    Args:
-        corpus: List of {'content': str, 'metadata': dict}
+    Do sử dụng Weaviate BM25 built-in nên index đã được xây dựng sẵn trên CSDL.
     """
-    # TODO: Implement BM25 index
-    #
-    # from rank_bm25 import BM25Okapi
-    #
-    # # Tokenize - cho tiếng Việt nên dùng underthesea hoặc đơn giản split()
-    # tokenized_corpus = [doc["content"].lower().split() for doc in corpus]
-    # bm25 = BM25Okapi(tokenized_corpus)
-    # return bm25
-    raise NotImplementedError("Implement build_bm25_index")
+    pass
 
 
 def lexical_search(query: str, top_k: int = 10) -> list[dict]:
     """
-    Tìm kiếm từ khóa sử dụng BM25.
+    Tìm kiếm từ khóa sử dụng BM25 tích hợp sẵn trong Weaviate.
 
     Args:
         query: Câu truy vấn
@@ -55,25 +47,37 @@ def lexical_search(query: str, top_k: int = 10) -> list[dict]:
         }
         Sorted by score descending.
     """
-    # TODO: Implement lexical search
-    #
-    # tokenized_query = query.lower().split()
-    # scores = bm25.get_scores(tokenized_query)
-    #
-    # # Get top_k indices
-    # import numpy as np
-    # top_indices = np.argsort(scores)[::-1][:top_k]
-    #
-    # results = []
-    # for idx in top_indices:
-    #     if scores[idx] > 0:
-    #         results.append({
-    #             "content": CORPUS[idx]["content"],
-    #             "score": float(scores[idx]),
-    #             "metadata": CORPUS[idx]["metadata"]
-    #         })
-    # return results
-    raise NotImplementedError("Implement lexical_search")
+    with weaviate.connect_to_local() as client:
+        collection = client.collections.get("DrugLawDocs")
+        
+        # Thực hiện tìm kiếm BM25 trên Weaviate
+        results = collection.query.bm25(
+            query=query,
+            limit=top_k,
+            return_metadata=MetadataQuery(score=True)
+        )
+        
+        search_results = []
+        for obj in results.objects:
+            properties = obj.properties or {}
+            metadata = {
+                "source": properties.get("source"),
+                "doc_type": properties.get("doc_type"),
+                "header_1": properties.get("header_1"),
+                "header_2": properties.get("header_2"),
+                "header_3": properties.get("header_3")
+            }
+            
+            search_results.append({
+                "content": properties.get("content", ""),
+                "score": obj.metadata.score if obj.metadata.score is not None else 0.0,
+                "metadata": metadata
+            })
+            
+        # Sắp xếp kết quả giảm dần theo score
+        search_results.sort(key=lambda x: x["score"], reverse=True)
+        return search_results
+
 
 
 if __name__ == "__main__":
