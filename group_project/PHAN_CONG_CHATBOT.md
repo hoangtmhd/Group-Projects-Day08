@@ -1,87 +1,87 @@
-# Khung Y Tuong + Phan Cong Chi Tiet (RAG Chatbot)
+# Khung Ý Tưởng + Phân Công Chi Tiết (RAG Chatbot)
 
-## 1) Muc tieu nhom
+## 1) Mục tiêu nhóm
 
-- Xay dung chatbot hoi dap ve phap luat ma tuy va tin tuc lien quan.
-- Cau tra loi co citation, co hoi dap tiep noi (follow-up), va hien thi nguon trich dan.
-- Co bo evaluation doc lap de do chat luong pipeline theo dung yeu cau 2.
+- Xây dựng chatbot hỏi đáp về pháp luật ma túy và tin tức liên quan.
+- Câu trả lời có citation, có hội đáp tiếp nối (follow-up), và hiển thị nguồn trích dẫn.
+- Có bộ evaluation độc lập để đo chất lượng pipeline theo đúng yêu cầu 2.
 
-## 2) Khung y tuong san pham
+## 2) Khung ý tưởng sản phẩm
 
-### Luong xu ly tong quan
+### Luồng xử lý tổng quan
 
-1. Thu thap va chuan hoa du lieu (legal + news).
-2. Tao chunks, indexing va retrieval (semantic + lexical + rerank + page index).
-3. Pipeline tra loi: retrieve -> rerank -> generate + citation.
-4. Frontend chat de nguoi dung hoi dap, xem citation va lich su hoi dap.
-5. Evaluation pipeline de do faithfulness, relevance, recall, precision va so sanh A/B.
+1. Thu thập và chuẩn hóa dữ liệu (legal + news).
+2. Tạo chunks, indexing và retrieval (semantic + lexical + rerank + page index).
+3. Pipeline trả lời: retrieve -> rerank -> generate + citation.
+4. Frontend chat để người dùng hỏi đáp, xem citation và lịch sử hỏi đáp.
+5. Evaluation pipeline để đo faithfulness, relevance, recall, precision và so sánh A/B.
 
-### Huong chia giai doan
+### Hướng chia giai đoạn
 
-- Giai doan 1 (Nen tang): du lieu + pipeline retrieval hoat dong.
-- Giai doan 2 (San pham): chatbot UI va luong hoi dap dau-cuoi.
-- Giai doan 3 (Chat luong): evaluation + bao cao ket qua + tai lieu demo.
+- Giai đoạn 1 (Nền tảng): dữ liệu + pipeline retrieval hoạt động.
+- Giai đoạn 2 (Sản phẩm): chatbot UI và luồng hỏi đáp đầu-cuối.
+- Giai đoạn 3 (Chất lượng): evaluation + báo cáo kết quả + tài liệu demo.
 
-## 3) Phan cong chi tiet theo thanh vien
+## 3) Phân công chi tiết theo thành viên
 
-## 3.1 Thai Minh - Thu thap tai lieu, lam data
+## 3.1 Thái Minh - Thu thập tài liệu, làm data
 
-### Nhiem vu chinh
+### Nhiệm vụ chính
 
-- Thu thap van ban phap ly va tin tuc lien quan den ma tuy.
-- Lam sach du lieu dau vao, loai bo noi dung trung lap, dung format.
-- Chuan hoa markdown/text de dua vao pipeline chunking.
+- Thu thập văn bản pháp lý và tin tức liên quan đến ma túy.
+- Làm sạch dữ liệu đầu vào, loại bỏ nội dung trùng lặp, đúng format.
+- Chuẩn hóa markdown/text để đưa vào pipeline chunking.
 
-### Dau ra can ban giao
+### Đầu ra cần bàn giao
 
-- Thu muc du lieu day du trong data/landing va data/standardized.
-- Danh sach nguon va quy tac loc du lieu.
-- Mau file dau vao da duoc chuan hoa de team index truc tiep.
+- Thư mục dữ liệu đầy đủ trong data/landing và data/standardized.
+- Danh sách nguồn và quy tắc lọc dữ liệu.
+- Mẫu file đầu vào đã được chuẩn hóa để team index trực tiếp.
 
-## 3.2 Anh - Lam chatbot
+## 3.2 Anh - Làm chatbot
 
-### Nhiem vu chinh
+### Nhiệm vụ chính
 
-- Noi retrieval pipeline voi generation de tra loi co citation.
-- Ho tro conversation memory cho follow-up questions.
-- Dong bo API/ham de frontend goi va hien thi source documents.
+- Nối retrieval pipeline với generation để trả lời có citation.
+- Hỗ trợ conversation memory cho follow-up questions.
+- Đồng bộ API/hàm để frontend gọi và hiển thị source documents.
 
-### Dau ra can ban giao
+### Đầu ra cần bàn giao
 
-- Luong hoi dap chatbot chay duoc end-to-end.
-- Ham tra ve ket qua dang: answer + sources + metadata can thiet.
-- Ban chat demo de team test nhanh truoc khi tich hop frontend.
+- Luồng hỏi đáp chatbot chạy được end-to-end.
+- Hàm trả về kết quả dạng: answer + sources + metadata cần thiết.
+- Bản chat demo để team test nhanh trước khi tích hợp frontend.
 
-## 3.3 Tam - Docs huong dan dung app, tai lieu demo
+## 3.3 Tâm - Docs hướng dẫn dùng app, tài liệu demo
 
-### Nhiem vu chinh
+### Nhiệm vụ chính
 
-- Viet huong dan cai dat va chay app cho giang vien/nguoi demo.
-- Viet kich ban demo ngan gon: input mau, output mong doi, diem nhan.
-- Tong hop mo ta kien truc va cach su dung cac module.
+- Viết hướng dẫn cài đặt và chạy app cho giảng viên/người demo.
+- Viết kịch bản demo ngắn gọn: input mẫu, output mong đợi, điểm nhấn.
+- Tổng hợp mô tả kiến trúc và cách sử dụng các module.
 
-### Dau ra can ban giao
+### Đầu ra cần bàn giao
 
-- Tai lieu huong dan su dung app trong README/tai lieu bo sung.
-- Tai lieu demo buoi bao cao (cac buoc + cau hoi mau + expected behavior).
+- Tài liệu hướng dẫn sử dụng app trong README/tài liệu bổ sung.
+- Tài liệu demo buổi báo cáo (các bước + câu hỏi mẫu + expected behavior).
 
-## 3.4 Em - Danh gia chat luong chatbot (tham chieu yeu cau 2)
+## 3.4 Em - Đánh giá chất lượng chatbot (tham chiếu yêu cầu 2)
 
-### Nhiem vu chinh
+### Nhiệm vụ chính
 
-- Tao golden dataset toi thieu 15 cap Q&A (question, expected_answer, expected_context).
-- Trien khai evaluation pipeline theo 1 framework (uu tien RAGAS hoac DeepEval).
-- Do 4 metric bat buoc:
+- Tạo golden dataset tối thiểu 15 cặp Q&A (question, expected_answer, expected_context).
+- Triển khai evaluation pipeline theo 1 framework (ưu tiên RAGAS hoặc DeepEval).
+- Đo 4 metric bắt buộc:
   - Faithfulness
   - Answer Relevance
   - Context Recall
   - Context Precision
-- Chay so sanh A/B it nhat 2 cau hinh:
-  - Vi du: co reranking vs khong reranking
-  - Hoac hybrid retrieval vs dense-only
-- Phan tich mau loi (worst performers) va de xuat cai tien.
+- Chạy so sánh A/B ít nhất 2 cấu hình:
+  - Ví dụ: có reranking vs không reranking
+  - Hoặc hybrid retrieval vs dense-only
+- Phân tích mẫu lỗi (worst performers) và đề xuất cải tiến.
 
-### Dau ra can ban giao
+### Đầu ra cần bàn giao
 
 - group_project/evaluation/golden_dataset.json
 - group_project/evaluation/eval_pipeline.py
@@ -89,27 +89,27 @@
 
 ## 3.5 Quang Minh - Frontend
 
-### Nhiem vu chinh
+### Nhiệm vụ chính
 
-- Xay dung giao dien chat (Streamlit/Gradio/Chainlit).
-- Hien thi lich su hoi dap, citation va danh sach source documents.
-- Toi uu trai nghiem demo: de nhap cau hoi, de xem nguon, de thu follow-up.
+- Xây dựng giao diện chat (Streamlit/Gradio/Chainlit).
+- Hiển thị lịch sử hỏi đáp, citation và danh sách source documents.
+- Tối ưu trải nghiệm demo: dễ nhập câu hỏi, dễ xem nguồn, dễ thử follow-up.
 
-### Dau ra can ban giao
+### Đầu ra cần bàn giao
 
-- Frontend chat tich hop chatbot backend.
-- Giao dien chay on dinh tren local de demo trong lop.
+- Frontend chat tích hợp chatbot backend.
+- Giao diện chạy ổn định trên local để demo trong lớp.
 
-## 4) Checklist phoi hop giua cac vai tro
+## 4) Checklist phối hợp giữa các vai trò
 
-- Thai Minh ban giao data standardized truoc khi index chot.
-- Anh va Quang Minh thong nhat contract du lieu cho cau tra loi + citation.
-- Em chot format output cua pipeline de eval script doc duoc thong nhat.
-- Tam chot tai lieu huong dan sau khi frontend va eval dat muc toi thieu de demo.
+- Thái Minh bàn giao data standardized trước khi index chốt.
+- Anh và Quang Minh thống nhất contract dữ liệu cho câu trả lời + citation.
+- Em chốt format output của pipeline để eval script đọc được thống nhất.
+- Tâm chốt tài liệu hướng dẫn sau khi frontend và eval đạt mức tối thiểu để demo.
 
-## 5) Dinh nghia hoan thanh
+## 5) Định nghĩa hoàn thành
 
-- Chatbot tra loi duoc cau hoi, co citation va follow-up memory.
-- Frontend su dung duoc trong demo thuc te.
-- Evaluation co diem so, co so sanh A/B, co nhan xet cai tien.
-- Co tai lieu huong dan dung app va kich ban demo ro rang.
+- Chatbot trả lời được câu hỏi, có citation và follow-up memory.
+- Frontend sử dụng được trong demo thực tế.
+- Evaluation có điểm số, có so sánh A/B, có nhận xét cải tiến.
+- Có tài liệu hướng dẫn dùng app và kịch bản demo rõ ràng.
