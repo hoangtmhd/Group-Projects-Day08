@@ -10,6 +10,13 @@ Yêu cầu:
 """
 
 
+import os
+import weaviate
+from weaviate.classes.query import MetadataQuery
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+
 def semantic_search(query: str, top_k: int = 10) -> list[dict]:
     """
     Tìm kiếm ngữ nghĩa sử dụng vector similarity.
@@ -26,37 +33,52 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
         }
         Sorted by score descending.
     """
-    # TODO: Implement semantic search
-    #
+    load_dotenv()
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
     # Bước 1: Embed query bằng cùng model ở Task 4
+    result = genai.embed_content(
+        model="models/gemini-embedding-2",
+        content=query,
+        task_type="retrieval_query"
+    )
+    query_embedding = result["embedding"]
+
     # Bước 2: Query vector store (cosine similarity)
-    # Bước 3: Return top_k results
-    #
-    # Ví dụ với Weaviate:
-    # import weaviate
-    # from sentence_transformers import SentenceTransformer
-    #
-    # model = SentenceTransformer("BAAI/bge-m3")
-    # query_embedding = model.encode(query).tolist()
-    #
-    # client = weaviate.connect_to_local()
-    # collection = client.collections.get("DrugLawDocs")
-    #
-    # results = collection.query.near_vector(
-    #     near_vector=query_embedding,
-    #     limit=top_k,
-    #     return_metadata=MetadataQuery(distance=True)
-    # )
-    #
-    # return [
-    #     {
-    #         "content": obj.properties["content"],
-    #         "score": 1 - obj.metadata.distance,  # distance → similarity
-    #         "metadata": {"source": obj.properties["source"], ...}
-    #     }
-    #     for obj in results.objects
-    # ]
-    raise NotImplementedError("Implement semantic_search")
+    with weaviate.connect_to_local() as client:
+        collection = client.collections.get("DrugLawDocs")
+        
+        results = collection.query.near_vector(
+            near_vector=query_embedding,
+            limit=top_k,
+            return_metadata=MetadataQuery(distance=True)
+        )
+
+        # Bước 3: Return top_k results
+        search_results = []
+        for obj in results.objects:
+            distance = obj.metadata.distance if obj.metadata.distance is not None else 0.0
+            score = 1.0 - distance
+            
+            properties = obj.properties or {}
+            metadata = {
+                "source": properties.get("source"),
+                "doc_type": properties.get("doc_type"),
+                "header_1": properties.get("header_1"),
+                "header_2": properties.get("header_2"),
+                "header_3": properties.get("header_3")
+            }
+            
+            search_results.append({
+                "content": properties.get("content", ""),
+                "score": score,
+                "metadata": metadata
+            })
+        
+        # Sắp xếp lại theo score giảm dần
+        search_results.sort(key=lambda x: x["score"], reverse=True)
+        return search_results
+
 
 
 if __name__ == "__main__":
