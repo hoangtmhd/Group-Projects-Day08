@@ -185,7 +185,7 @@ Chi tiet phan cong va khung y tuong thuc hien duoc mo ta tai file: `group_projec
 | Thái Minh |  | Thu thập tài liệu, làm data (landing + standardized) | Planned |
 | Anh |  | Làm chatbot (retrieval + generation + citation + follow-up memory) | Planned |
 | Tâm |  | Làm docs hướng dẫn dùng app, tài liệu demo | Planned |
-| Em |  | Đánh giá chất lượng chatbot theo yêu cầu 2 (golden dataset, metrics, A/B, report) | Planned |
+| Giáp |  | Đánh giá chất lượng chatbot theo yêu cầu 2 (golden dataset, metrics, A/B, report) | Planned |
 | Quang Minh |  | Làm frontend chat, hiển thị citation và source documents | Planned |
 
 ---

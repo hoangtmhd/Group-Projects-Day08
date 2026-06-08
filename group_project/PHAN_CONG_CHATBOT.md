@@ -65,7 +65,7 @@
 - Tài liệu hướng dẫn sử dụng app trong README/tài liệu bổ sung.
 - Tài liệu demo buổi báo cáo (các bước + câu hỏi mẫu + expected behavior).
 
-## 3.4 Em - Đánh giá chất lượng chatbot (tham chiếu yêu cầu 2)
+## 3.4 Giáp - Đánh giá chất lượng chatbot (tham chiếu yêu cầu 2)
 
 ### Nhiệm vụ chính
 
