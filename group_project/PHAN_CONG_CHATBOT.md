@@ -38,19 +38,19 @@
 - Danh sách nguồn và quy tắc lọc dữ liệu.
 - Mẫu file đầu vào đã được chuẩn hóa để team index trực tiếp.
 
-## 3.2 Hoàng - Làm chatbot
+## 3.2 Hoàng - Làm chatbot [ĐÃ HOÀN THÀNH]
 
 ### Nhiệm vụ chính
 
-- Nối retrieval pipeline với generation để trả lời có citation.
-- Hỗ trợ conversation memory cho follow-up questions.
-- Đồng bộ API/hàm để frontend gọi và hiển thị source documents.
+- [x] Nối retrieval pipeline với generation để trả lời có citation (Xem [chatbot.py](file:///d:/Work/Study/ai-in-action/Lab8/Group-Projects-Day08/group_project/chatbot.py)).
+- [x] Hỗ trợ conversation memory cho follow-up questions (Xem [chatbot.py](file:///d:/Work/Study/ai-in-action/Lab8/Group-Projects-Day08/group_project/chatbot.py)).
+- [x] Đồng bộ API/hàm để frontend gọi và hiển thị source documents.
 
 ### Đầu ra cần bàn giao
 
-- Luồng hỏi đáp chatbot chạy được end-to-end.
-- Hàm trả về kết quả dạng: answer + sources + metadata cần thiết.
-- Bản chat demo để team test nhanh trước khi tích hợp frontend.
+- [x] Luồng hỏi đáp chatbot chạy được end-to-end (Đã bàn giao trong class `RAGChatbot` của `chatbot.py`).
+- [x] Hàm trả về kết quả dạng: `answer` + `sources` + `metadata` cần thiết.
+- [x] Bản chat demo để team test nhanh trước khi tích hợp frontend (Đã bàn giao ứng dụng giao diện chat trong [app.py](file:///d:/Work/Study/ai-in-action/Lab8/Group-Projects-Day08/group_project/app.py)).
 
 ## 3.3 Tâm - Docs hướng dẫn dùng app, tài liệu demo
 
