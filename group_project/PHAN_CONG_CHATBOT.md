@@ -38,7 +38,7 @@
 - Danh sách nguồn và quy tắc lọc dữ liệu.
 - Mẫu file đầu vào đã được chuẩn hóa để team index trực tiếp.
 
-## 3.2 Anh - Làm chatbot
+## 3.2 Hoàng - Làm chatbot
 
 ### Nhiệm vụ chính
 
@@ -65,7 +65,7 @@
 - Tài liệu hướng dẫn sử dụng app trong README/tài liệu bổ sung.
 - Tài liệu demo buổi báo cáo (các bước + câu hỏi mẫu + expected behavior).
 
-## 3.4 Em - Đánh giá chất lượng chatbot (tham chiếu yêu cầu 2)
+## 3.4 Giáp - Đánh giá chất lượng chatbot (tham chiếu yêu cầu 2)
 
 ### Nhiệm vụ chính
 
@@ -103,8 +103,8 @@
 ## 4) Checklist phối hợp giữa các vai trò
 
 - Thái Minh bàn giao data standardized trước khi index chốt.
-- Anh và Quang Minh thống nhất contract dữ liệu cho câu trả lời + citation.
-- Em chốt format output của pipeline để eval script đọc được thống nhất.
+- Hoàng và Quang Minh thống nhất contract dữ liệu cho câu trả lời + citation.
+- Giáp chốt format output của pipeline để eval script đọc được thống nhất.
 - Tâm chốt tài liệu hướng dẫn sau khi frontend và eval đạt mức tối thiểu để demo.
 
 ## 5) Định nghĩa hoàn thành
