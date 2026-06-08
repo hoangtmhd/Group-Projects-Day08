@@ -26,7 +26,12 @@ Cài đặt:
     pip install langchain-text-splitters sentence-transformers weaviate-client
 """
 
+import json
 from pathlib import Path
+import weaviate
+from weaviate.classes.config import Configure, Property, DataType
+from sentence_transformers import SentenceTransformer
+from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 
 STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
 
@@ -35,17 +40,29 @@ STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
 # CONFIGURATION — Giải thích lựa chọn của bạn trong comment
 # =============================================================================
 
-# TODO: Chọn chunking strategy và giải thích vì sao
-CHUNK_SIZE = 500        # Vì sao chọn 500? ...
-CHUNK_OVERLAP = 50      # Vì sao chọn 50? ...
-CHUNKING_METHOD = "recursive"  # "recursive" | "markdown_header" | "semantic"
+# CHUNK_SIZE = 500: Chọn 500 ký tự (khoảng 80-100 từ tiếng Việt) làm kích thước tối đa cho mỗi chunk.
+# Kích thước này đủ nhỏ để đảm bảo tính tập trung ngữ nghĩa (semantic focus) cao cho tìm kiếm dense/semantic search,
+# đồng thời đảm bảo không bị vượt quá giới hạn của các mô hình LLM và tối ưu thời gian xử lý.
+CHUNK_SIZE = 500
 
-# TODO: Chọn embedding model và giải thích
-EMBEDDING_MODEL = "BAAI/bge-m3"  # Vì sao? Multilingual, tốt cho tiếng Việt
-EMBEDDING_DIM = 1024
+# CHUNK_OVERLAP = 50: Chọn 50 ký tự (khoảng 8-10 từ tiếng Việt) làm overlap giữa các chunk liền kề.
+# Overlap giúp giữ được tính liên tục của ngữ cảnh, tránh việc các câu bị ngắt đôi giữa các chunk và mất thông tin.
+CHUNK_OVERLAP = 50
 
-# TODO: Chọn vector store
-VECTOR_STORE = "weaviate"  # "weaviate" | "chromadb" | "faiss"
+# CHUNKING_METHOD = "hybrid": Kết hợp chia theo cấu trúc Markdown Header trước (giúp giữ ngữ cảnh phân cấp),
+# sau đó nếu chunk nào vượt quá CHUNK_SIZE thì chia tiếp bằng RecursiveCharacterTextSplitter.
+CHUNKING_METHOD = "hybrid"
+
+# EMBEDDING_MODEL = "models/gemini-embedding-2": Sử dụng mô hình embedding của Gemini API để tính toán nhanh chóng
+# trên đám mây, tránh việc tải mô hình 2GB về chạy CPU local quá chậm.
+EMBEDDING_MODEL = "models/gemini-embedding-2"
+
+# models/gemini-embedding-2 sinh vector embedding có số chiều mặc định là 3072.
+EMBEDDING_DIM = 3072
+
+# VECTOR_STORE = "weaviate": Sử dụng Weaviate chạy local qua Docker để hỗ trợ tìm kiếm kết hợp Hybrid Search (dense + sparse)
+# nguyên bản (built-in) chất lượng cao.
+VECTOR_STORE = "weaviate"
 
 
 # =============================================================================
@@ -59,17 +76,15 @@ def load_documents() -> list[dict]:
     Returns:
         List of {'content': str, 'metadata': {'source': str, 'type': str}}
     """
-    # TODO: Iterate qua STANDARDIZED_DIR, đọc .md files
-    # documents = []
-    # for md_file in STANDARDIZED_DIR.rglob("*.md"):
-    #     content = md_file.read_text(encoding="utf-8")
-    #     doc_type = "legal" if "legal" in str(md_file) else "news"
-    #     documents.append({
-    #         "content": content,
-    #         "metadata": {"source": md_file.name, "type": doc_type}
-    #     })
-    # return documents
-    raise NotImplementedError("Implement load_documents")
+    documents = []
+    for md_file in STANDARDIZED_DIR.rglob("*.md"):
+        content = md_file.read_text(encoding="utf-8")
+        doc_type = "legal" if "legal" in str(md_file) else "news"
+        documents.append({
+            "content": content,
+            "metadata": {"source": md_file.name, "type": doc_type}
+        })
+    return documents
 
 
 def chunk_documents(documents: list[dict]) -> list[dict]:
@@ -79,26 +94,41 @@ def chunk_documents(documents: list[dict]) -> list[dict]:
     Returns:
         List of {'content': str, 'metadata': dict} — mỗi item là 1 chunk
     """
-    # TODO: Implement chunking
-    #
-    # Ví dụ với RecursiveCharacterTextSplitter:
-    # from langchain_text_splitters import RecursiveCharacterTextSplitter
-    #
-    # splitter = RecursiveCharacterTextSplitter(
-    #     chunk_size=CHUNK_SIZE,
-    #     chunk_overlap=CHUNK_OVERLAP,
-    #     separators=["\n\n", "\n", ". ", " ", ""]
-    # )
-    # chunks = []
-    # for doc in documents:
-    #     splits = splitter.split_text(doc["content"])
-    #     for i, chunk_text in enumerate(splits):
-    #         chunks.append({
-    #             "content": chunk_text,
-    #             "metadata": {**doc["metadata"], "chunk_index": i}
-    #         })
-    # return chunks
-    raise NotImplementedError("Implement chunk_documents")
+    headers_to_split_on = [
+        ("#", "Header 1"),
+        ("##", "Header 2"),
+        ("###", "Header 3"),
+    ]
+    markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
+    recursive_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP,
+        separators=["\n\n", "\n", ". ", " ", ""]
+    )
+
+    chunks = []
+    for doc in documents:
+        # Bắt đầu phân đoạn theo Markdown Header trước
+        md_docs = markdown_splitter.split_text(doc["content"])
+        for md_doc in md_docs:
+            combined_metadata = {**doc["metadata"], **md_doc.metadata}
+            text = md_doc.page_content
+            
+            # Nếu phân đoạn nhỏ hơn CHUNK_SIZE, giữ nguyên
+            if len(text) <= CHUNK_SIZE:
+                chunks.append({
+                    "content": text,
+                    "metadata": combined_metadata
+                })
+            else:
+                # Nếu phân đoạn quá dài, chia tiếp bằng RecursiveCharacterTextSplitter
+                splits = recursive_splitter.split_text(text)
+                for i, chunk_text in enumerate(splits):
+                    chunks.append({
+                        "content": chunk_text,
+                        "metadata": {**combined_metadata, "chunk_index": i}
+                    })
+    return chunks
 
 
 def embed_chunks(chunks: list[dict]) -> list[dict]:
@@ -108,51 +138,73 @@ def embed_chunks(chunks: list[dict]) -> list[dict]:
     Returns:
         Mỗi chunk dict được thêm key 'embedding': list[float]
     """
-    # TODO: Implement embedding
-    #
-    # Ví dụ với sentence-transformers:
-    # from sentence_transformers import SentenceTransformer
-    #
-    # model = SentenceTransformer(EMBEDDING_MODEL)
-    # texts = [c["content"] for c in chunks]
-    # embeddings = model.encode(texts, show_progress_bar=True)
-    # for chunk, emb in zip(chunks, embeddings):
-    #     chunk["embedding"] = emb.tolist()
-    # return chunks
-    raise NotImplementedError("Implement embed_chunks")
+    import os
+    import google.generativeai as genai
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+    texts = [c["content"] for c in chunks]
+    
+    # Chia nhỏ thành các batch 100 để tránh lỗi giới hạn kích thước payload của API
+    batch_size = 100
+    embeddings = []
+    
+    print(f"Starting Gemini embeddings generation for {len(texts)} chunks...")
+    for i in range(0, len(texts), batch_size):
+        batch_texts = texts[i:i + batch_size]
+        print(f"  Embedding batch {i // batch_size + 1} / {(len(texts) - 1) // batch_size + 1}...")
+        
+        result = genai.embed_content(
+            model=EMBEDDING_MODEL,
+            content=batch_texts,
+            task_type="retrieval_document"
+        )
+        embeddings.extend(result['embedding'])
+
+    for chunk, emb in zip(chunks, embeddings):
+        chunk["embedding"] = emb
+    return chunks
 
 
 def index_to_vectorstore(chunks: list[dict]):
     """
     Lưu chunks vào vector store đã chọn.
     """
-    # TODO: Implement indexing
-    #
-    # Ví dụ với Weaviate:
-    # import weaviate
-    # from weaviate.classes.config import Configure, Property, DataType
-    #
-    # client = weaviate.connect_to_local()  # hoặc connect_to_weaviate_cloud()
-    #
-    # # Tạo collection
-    # collection = client.collections.create(
-    #     name="DrugLawDocs",
-    #     vectorizer_config=Configure.Vectorizer.none(),
-    #     properties=[
-    #         Property(name="content", data_type=DataType.TEXT),
-    #         Property(name="source", data_type=DataType.TEXT),
-    #         Property(name="doc_type", data_type=DataType.TEXT),
-    #     ]
-    # )
-    #
-    # # Insert chunks
-    # with collection.batch.dynamic() as batch:
-    #     for chunk in chunks:
-    #         batch.add_object(
-    #             properties={"content": chunk["content"], ...},
-    #             vector=chunk["embedding"]
-    #         )
-    raise NotImplementedError("Implement index_to_vectorstore")
+    with weaviate.connect_to_local() as client:
+        # Nếu collection đã tồn tại, xóa đi để tạo mới
+        if client.collections.exists("DrugLawDocs"):
+            client.collections.delete("DrugLawDocs")
+        
+        collection = client.collections.create(
+            name="DrugLawDocs",
+            vectorizer_config=Configure.Vectorizer.none(),
+            properties=[
+                Property(name="content", data_type=DataType.TEXT),
+                Property(name="source", data_type=DataType.TEXT),
+                Property(name="doc_type", data_type=DataType.TEXT),
+                Property(name="header_1", data_type=DataType.TEXT),
+                Property(name="header_2", data_type=DataType.TEXT),
+                Property(name="header_3", data_type=DataType.TEXT),
+            ]
+        )
+
+        with collection.batch.dynamic() as batch:
+            for chunk in chunks:
+                meta = chunk["metadata"]
+                properties = {
+                    "content": chunk["content"],
+                    "source": meta.get("source", ""),
+                    "doc_type": meta.get("type", ""),
+                    "header_1": meta.get("Header 1", ""),
+                    "header_2": meta.get("Header 2", ""),
+                    "header_3": meta.get("Header 3", ""),
+                }
+                batch.add_object(
+                    properties=properties,
+                    vector=chunk["embedding"]
+                )
 
 
 def run_pipeline():
