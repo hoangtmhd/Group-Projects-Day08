@@ -1,0 +1,42 @@
+# Graham Potter - canh bạc thất bại của Chelsea - Báo VnExpress Thể thao
+
+**Source:** https://vnexpress.net/ca-si-chi-dan-bi-tam-giu-4589258.html
+**Crawled:** 2026-06-08T16:43:46.635045
+
+---
+
+Sa thải HLV Graham Potter là kết cục khó tránh khi Chelsea của các ông chủ Mỹ không giành được kết quả tích cực trên sân cỏ và sự ủng hộ từ các CĐV.
+
+Trong 19 năm sở hữu Chelsea, từ 2003-2022, Roman Abramovich nổi tiếng tàn nhẫn khi thay HLV. Nhưng tỷ phú Nga chưa từng sa thải hai nhà cầm quân trong cùng một mùa giải - điều mà ông chủ mới Todd Boehly vừa làm. Graham Potter vừa bị cho thôi việc chỉ bảy tháng sau khi đến Stamford Bridge thay Thomas Tuchel - vị tiền nhiệm ra đi hồi tháng 9/2022 chỉ sau bảy trận đầu mùa.
+
+Đông đảo CĐV Chelsea vui mừng đón nhận thông tin trên, bởi họ không thể chấp nhận việc đội nhà chơi tệ hại và tụt xuống nửa dưới Ngoại hạng Anh. Nhưng việc Potter bị sa thải khi còn chưa hết năm đầu trong hợp đồng năm năm cũng đồng nghĩa với việc các ông chủ mới ngầm thừa nhận họ thất bại ở phương diện điều hành. Và những người từng chỉ trích Boehly vì cách làm việc tuỳ hứng như chơi game điện tử hơn đời thực... càng có thêm lý do để bất mãn.
+
+Boehly (phải) ngồi cạnh Potter (giữa) trong lễ công HLV người Anh hồi tháng 9/2022. Ảnh: Chelsea FC
+
+Không ai có thể nghi ngờ Boehly và các nhà đầu tư của ông về tham vọng cùng Chelsea, khi họ chi khoảng 680 triệu USD để nâng cấp đội hình ở hai kỳ chuyển nhượng gần nhất, với đa phần là những cầu thủ trẻ tiềm năng được đưa về theo hợp đồng dài hạn. "Nhưng khi đã quyết định sa thải một HLV đẳng cấp thế giới như Thomas Tuchel hồi đầu mùa, lẽ ra giới chủ Mỹ không được đi sai dù chỉ một nước cờ", The Athletic bình luận.
+
+Chelsea tốn tới 28 triệu USD cho Brighton để chuộc hợp đồng của Potter, đồng thời trả cho HLV này xấp xỉ 15 triệu USD tiền lương mỗi mùa, nhưng những gì nhận lại không hề tương xứng. Ban đầu, giới chủ Chelsea cảm thấy ấn tượng trước sự thăng tiến của Potter khi bắt đầu từ hạng Chín bóng đá Anh với Leeds Carnegie trước khi thể hiện bản thân tại các CLB như Ostersunds, Swansea và Brighton.
+
+Nhà cầm quân người Anh cho thấy bản thân là một người dám mạo hiểm, cộng thêm việc luôn sẵn sàng trao đổi với ban lãnh đạo, trái ngược với phong cách có phần độc đoán của Tuchel. Trong khi đó, Boehly cũng từng gặt hái thành công với đội bóng chày LA Dodgers và HLV Dave Roberts theo mô hình tương tự. Họ đã kiên nhẫn chờ năm năm để Dodgers vô địch giải World Series và được ngợi ca vì kiên trì chờ quả ngọt. Nhưng bóng đá Anh không đơn giản là áp dụng công thức chiến thắng từ môn thể thao khác, một đất nước khác vào và gặt hái thành công tương tự, đặc biệt ở một vị trí nóng như ghế HLV Chelsea.
+
+Potter có thể đã tạo dựng được tiếng tăm, nhưng chưa được biết tới như một nhà vô địch. So với bảng vàng thành tích nhiều người tiền nhiệm, chiếc Cup quốc gia Thuỵ Điển của Potter quá bé nhỏ. Một trong những ứng viên khác cho ghế HLV Chelsea lúc Boehly sa thải Tuchel là Mauricio Pochettino đã không được chọn, dù giàu kinh nghiệm và đã có danh hiệu khi dẫn dắt Tottenham và PSG.
+
+Với Potter, ghế HLV Chelsea là nấc thang mới trong sự nghiệp và không ai có thể trách việc ông nhanh chóng nhận lời khi được Boehly mời. Nhưng đây là một quyết định vội vã, và chỉ sau vài tháng Potter đã thấm rõ áp lực, khi tuyên bố ông đang làm "công việc khó nhất thế giới bóng đá". Mọi thứ càng thêm nặng nề khi Potter sở hữu tỷ lệ thắng thấp nhất trong số các HLV Chelsea 30 năm qua và thua cả đội bét bảng Southampton.
+
+Việc bổ nhiệm Potter ngay từ đầu đã không làm hài lòng nhiều CĐV, những người vẫn cho rằng việc sa thải Tuchel là quá vội vã, dù Chelsea đúng là đã sa sút trong giai đoạn cuối triều đại HLV người Đức. Ngay cả những ông chủ của Chelsea cũng không ngờ tới phản ứng mạnh mẽ của người hâm mộ với Potter, đặc biệt trong và sau thất bại 1-0 trước Southamton tại Stamford Bridge. Trận thua Aston Villa là giọt nước làm tràn ly, với những tiếng hô vang "Ông không biết mình đang làm gì" và "Sáng hôm sau ông sẽ bị sa thải" trên các khán đài.
+
+Potter động viên các cầu thủ Chelsea sau trận thua Aston Villa 0-2 trên sân nhà - trận cuối của ông trước khi bị sa thải. Ảnh: AFP
+
+Trong nhiều tháng liền, giới chủ Chelsea đã kiên nhẫn ủng hộ Potter, tới mức bị xem là bao dung hơn mức cần thiết, dù đội bóng không hề tiến bộ. Boehly và cộng sự kỳ vọng Potter có thể làm được như Mikel Arteta: trải qua giai đoạn đầu khó khăn tại Arsenal, lấy được tình cảm người hâm mộ và đưa đội bóng cạnh tranh chức vô địch. Nhưng thất bại 0-2 trước Tottenham trong tháng Hai là bước ngoặt khiến ban lãnh đạo Chelsea hoài nghi năng lực Potter. Chuỗi ba trận thắng liên tiếp sau đó, gồm cả chiến thắng trước Dortmund đưa họ vào tứ kết Champions League, thực chất chỉ trì hoãn ngày Potter bị sa thải.
+
+"Việc sa thải Potter là quyết định không thể tránh khỏi, khi nhìn vào các kết quả trên sân cũng như thái độ của người hâm mộ. Ngay cả khi cùng Chelsea thắng, HLV này cũng không nhận được trọn vẹn tình cảm từ người hâm mộ, và ban lãnh đạo buộc phải thừa nhận sai lầm và sửa sai trước khi quá muộn", The Athletic bình luận.
+
+Dù vậy, cách làm của ban lãnh đạo Chelsea mùa này phát đi hai thông điệp rất rõ ràng: HLV sẽ phải trả giá vì những kết quả yếu kém (Potter) hoặc thiếu tương tác với giới chủ (Tuchel). Sẽ rất khó để Chelsea thuyết phục HLV kế tiếp rằng ông vẫn sẽ an toàn nếu lặp lại những điều trên.
+
+Ghế HLV Chelsea chắc chắn vẫn sẽ hấp dẫn những tên tuổi hàng đầu, nhờ cơ hội được đãi ngộ hậu hĩnh, làm việc với đội hình nhiều sao và khả năng cạnh tranh các danh hiệu. Hiện Julian Nagelsmann là ứng viên nổi trội, sau khi bị Bayern Munich sa thải để nhường chỗ cho chính Tuchel tuần trước. Nhưng dù người kế nhiệm Potter có là Nagelsmann hay ai đi chăng nữa, họ vẫn sẽ cần thêm những sự bảo đảm lâu dài trước khi đặt bút ký hợp đồng. Chính phong cách sa thải HLV thẳng tay dưới thời Abramovich là một trong những nguyên nhân khiến Pep Guardiola và Jurgen Klopp chưa bao giờ tới nắm quyền tại Stamford Bridge.
+
+Sau tất cả hứa hẹn về cách điều hành khác biệt, rút cuộc Chelsea thời các ông chủ mới vẫn là "bình mới rượu cũ". Các Giám đốc Điều hành Christopher Vivell và Paul Winstanley chỉ đưa ra ý kiến, quyết định cuối cùng thuộc về ông chủ Todd Boehly và các nhà đầu tư cùng ông. Chelsea hiện tại vì thế cũng giống thời Abramovich, chỉ khác ở chỗ họ không có danh hiệu nào đi kèm, ít nhất là ở mùa giải này.
+
+Báo điện tử VnExpress Báo tiếng Việt nhiều người xem nhất Thuộc Bộ Khoa học Công nghệ Số giấy phép: 548/GP-BTTTT do Bộ Thông tin và Truyền thông cấp ngày 24/08/2021
+
+Tổng biên tập: Phạm Văn Hiếu Địa chỉ: Tầng 10, Tòa A FPT Tower, số 10 Phạm Văn Bạch, phường Cầu Giấy, Hà NộiĐiện thoại: 024 7300 8899 - máy lẻ 4500
