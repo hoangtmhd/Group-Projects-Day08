@@ -1,0 +1,31 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+
+# Python caches and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Testing and evaluation
+.pytest_cache/
+.deepeval/
+.coverage
+htmlcov/
+result_*.json
+evaluation_results/
+
+# IDE configurations
+.vscode/
+.idea/
+*.swp
+*.swo
