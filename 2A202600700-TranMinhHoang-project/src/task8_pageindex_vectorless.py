@@ -141,7 +141,11 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
             for node in nodes:
                 content = node.get("text") or node.get("content") or ""
                 score = node.get("score") or 0.0
-                metadata = node.get("metadata") or {}
+                metadata_val = node.get("metadata")
+                if isinstance(metadata_val, dict):
+                    metadata = metadata_val.copy()
+                else:
+                    metadata = {}
                 # Ghi nhận thông tin nguồn
                 metadata["doc_name"] = doc_name
                 metadata["doc_id"] = doc_id
