@@ -9,14 +9,26 @@ Chọn 1 trong các phương pháp:
 Nếu dùng MMR hoặc RRF, đảm bảo hiểu và giải thích được cơ chế.
 """
 
-from typing import Optional
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+from rank_bm25 import BM25Okapi
+
+
+def cosine_sim(a: list[float], b: list[float]) -> float:
+    """
+    Tính cosine similarity giữa 2 vector.
+    Do vector sinh ra từ models/gemini-embedding-2 đã được L2 normalized (độ dài = 1),
+    cosine similarity chính là tích vô hướng (dot product) của 2 vector.
+    """
+    return sum(x * y for x, y in zip(a, b))
 
 
 def rerank_cross_encoder(
     query: str, candidates: list[dict], top_k: int = 5
 ) -> list[dict]:
     """
-    Rerank candidates sử dụng cross-encoder model.
+    Rerank candidates sử dụng sự kết hợp giữa Semantic (Gemini) và Lexical (BM25).
 
     Args:
         query: Câu truy vấn
@@ -26,30 +38,64 @@ def rerank_cross_encoder(
     Returns:
         List of top_k candidates, re-scored và sorted by rerank_score descending.
     """
-    # TODO: Implement cross-encoder reranking
-    #
-    # Option A: Jina Reranker API
-    # import requests
-    # response = requests.post(
-    #     "https://api.jina.ai/v1/rerank",
-    #     headers={"Authorization": f"Bearer {JINA_API_KEY}"},
-    #     json={
-    #         "model": "jina-reranker-v2-base-multilingual",
-    #         "query": query,
-    #         "documents": [c["content"] for c in candidates],
-    #         "top_n": top_k
-    #     }
-    # )
-    # reranked = response.json()["results"]
-    # return [
-    #     {**candidates[r["index"]], "score": r["relevance_score"]}
-    #     for r in reranked
-    # ]
-    #
-    # Option B: Local model (Qwen3-Reranker)
-    # from transformers import AutoModelForSequenceClassification, AutoTokenizer
-    # ...
-    raise NotImplementedError("Implement rerank_cross_encoder")
+    if not candidates:
+        return []
+
+    load_dotenv()
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+    # 1. Xếp hạng theo ngữ nghĩa (Semantic Ranking)
+    q_res = genai.embed_content(
+        model="models/gemini-embedding-2",
+        content=query,
+        task_type="retrieval_query"
+    )
+    query_embedding = q_res["embedding"]
+
+    c_res = genai.embed_content(
+        model="models/gemini-embedding-2",
+        content=[c["content"] for c in candidates],
+        task_type="retrieval_document"
+    )
+    candidate_embeddings = c_res["embedding"]
+
+    semantic_scores = [cosine_sim(query_embedding, c_emb) for c_emb in candidate_embeddings]
+    semantic_ranked = sorted(
+        [{"index": i, "content": candidates[i]["content"], "score": semantic_scores[i]} for i in range(len(candidates))],
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
+    # 2. Xếp hạng theo từ khóa (Lexical Ranking)
+    tokenized_corpus = [c["content"].lower().split() for c in candidates]
+    bm25 = BM25Okapi(tokenized_corpus)
+    tokenized_query = query.lower().split()
+    lexical_scores = bm25.get_scores(tokenized_query)
+
+    lexical_ranked = sorted(
+        [{"index": i, "content": candidates[i]["content"], "score": lexical_scores[i]} for i in range(len(candidates))],
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
+    # 3. Kết hợp bằng Reciprocal Rank Fusion (RRF)
+    k = 60
+    rrf_scores = {i: 0.0 for i in range(len(candidates))}
+
+    for rank, item in enumerate(semantic_ranked, 1):
+        rrf_scores[item["index"]] += 1 / (k + rank)
+
+    for rank, item in enumerate(lexical_ranked, 1):
+        rrf_scores[item["index"]] += 1 / (k + rank)
+
+    # Cập nhật điểm score và sắp xếp lại danh sách ban đầu
+    reranked_candidates = []
+    for idx, rrf_score in sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True):
+        item = candidates[idx].copy()
+        item["score"] = rrf_score
+        reranked_candidates.append(item)
+
+    return reranked_candidates[:top_k]
 
 
 def rerank_mmr(
@@ -72,37 +118,51 @@ def rerank_mmr(
     Returns:
         List of top_k candidates selected by MMR.
     """
-    # TODO: Implement MMR
-    #
-    # selected = []
-    # remaining = list(range(len(candidates)))
-    #
-    # for _ in range(min(top_k, len(candidates))):
-    #     best_idx = None
-    #     best_score = float('-inf')
-    #
-    #     for idx in remaining:
-    #         # Relevance to query
-    #         relevance = cosine_sim(query_embedding, candidates[idx]["embedding"])
-    #
-    #         # Max similarity to already selected
-    #         max_sim_to_selected = 0
-    #         for sel_idx in selected:
-    #             sim = cosine_sim(candidates[idx]["embedding"], candidates[sel_idx]["embedding"])
-    #             max_sim_to_selected = max(max_sim_to_selected, sim)
-    #
-    #         # MMR score
-    #         mmr_score = lambda_param * relevance - (1 - lambda_param) * max_sim_to_selected
-    #
-    #         if mmr_score > best_score:
-    #             best_score = mmr_score
-    #             best_idx = idx
-    #
-    #     selected.append(best_idx)
-    #     remaining.remove(best_idx)
-    #
-    # return [candidates[i] for i in selected]
-    raise NotImplementedError("Implement rerank_mmr")
+    if not candidates:
+        return []
+
+    # Đảm bảo các candidates có vector embedding, nếu thiếu sẽ sinh bằng Gemini
+    missing_embs = [i for i, c in enumerate(candidates) if "embedding" not in c or c["embedding"] is None]
+    if missing_embs:
+        load_dotenv()
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        c_res = genai.embed_content(
+            model="models/gemini-embedding-2",
+            content=[candidates[i]["content"] for i in missing_embs],
+            task_type="retrieval_document"
+        )
+        for idx, emb in zip(missing_embs, c_res["embedding"]):
+            candidates[idx]["embedding"] = emb
+
+    selected = []
+    remaining = list(range(len(candidates)))
+
+    for _ in range(min(top_k, len(candidates))):
+        best_idx = None
+        best_score = float('-inf')
+
+        for idx in remaining:
+            # Độ tương đồng với query
+            relevance = cosine_sim(query_embedding, candidates[idx]["embedding"])
+
+            # Độ tương đồng lớn nhất với các tài liệu đã chọn
+            max_sim_to_selected = 0.0
+            for sel_idx in selected:
+                sim = cosine_sim(candidates[idx]["embedding"], candidates[sel_idx]["embedding"])
+                max_sim_to_selected = max(max_sim_to_selected, sim)
+
+            # Điểm MMR
+            mmr_score = lambda_param * relevance - (1 - lambda_param) * max_sim_to_selected
+
+            if mmr_score > best_score:
+                best_score = mmr_score
+                best_idx = idx
+
+        if best_idx is not None:
+            selected.append(best_idx)
+            remaining.remove(best_idx)
+
+    return [candidates[i] for i in selected]
 
 
 def rerank_rrf(
@@ -121,28 +181,24 @@ def rerank_rrf(
     Returns:
         List of top_k candidates sorted by RRF score descending.
     """
-    # TODO: Implement RRF
-    #
-    # rrf_scores = {}  # content -> score
-    # content_map = {}  # content -> full dict
-    #
-    # for ranked_list in ranked_lists:
-    #     for rank, item in enumerate(ranked_list, 1):
-    #         key = item["content"]
-    #         rrf_scores[key] = rrf_scores.get(key, 0) + 1 / (k + rank)
-    #         content_map[key] = item
-    #
-    # # Sort by RRF score
-    # sorted_items = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
-    #
-    # results = []
-    # for content, score in sorted_items[:top_k]:
-    #     item = content_map[content].copy()
-    #     item["score"] = score
-    #     results.append(item)
-    #
-    # return results
-    raise NotImplementedError("Implement rerank_rrf")
+    rrf_scores = {}  # content -> score
+    content_map = {}  # content -> full dict
+
+    for ranked_list in ranked_lists:
+        for rank, item in enumerate(ranked_list, 1):
+            key = item["content"]
+            rrf_scores[key] = rrf_scores.get(key, 0.0) + 1.0 / (k + rank)
+            content_map[key] = item
+
+    sorted_items = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
+
+    results = []
+    for content, score in sorted_items[:top_k]:
+        item = content_map[content].copy()
+        item["score"] = score
+        results.append(item)
+
+    return results
 
 
 # =============================================================================
@@ -170,11 +226,23 @@ def rerank(
     if method == "cross_encoder":
         return rerank_cross_encoder(query, candidates, top_k)
     elif method == "mmr":
-        # Cần query_embedding - embed query trước
-        raise NotImplementedError("Call rerank_mmr with query_embedding")
+        load_dotenv()
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        q_res = genai.embed_content(
+            model="models/gemini-embedding-2",
+            content=query,
+            task_type="retrieval_query"
+        )
+        query_embedding = q_res["embedding"]
+        return rerank_mmr(query_embedding, candidates, top_k)
     elif method == "rrf":
-        # RRF cần nhiều ranked lists - gọi riêng
-        raise NotImplementedError("Call rerank_rrf with ranked_lists")
+        # RRF cần nhiều ranked lists. Nếu input là danh sách các danh sách:
+        if candidates and isinstance(candidates[0], list):
+            return rerank_rrf(candidates, top_k)
+        else:
+            # Nếu chỉ có 1 danh sách candidates đơn lẻ, thực hiện RRF kết hợp
+            # giữa semantic rank và lexical rank của danh sách đó.
+            return rerank_cross_encoder(query, candidates, top_k)
     else:
         raise ValueError(f"Unknown rerank method: {method}")
 
