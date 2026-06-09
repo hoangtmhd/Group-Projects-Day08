@@ -53,12 +53,11 @@ CHUNK_OVERLAP = 50
 # sau đó nếu chunk nào vượt quá CHUNK_SIZE thì chia tiếp bằng RecursiveCharacterTextSplitter.
 CHUNKING_METHOD = "hybrid"
 
-# EMBEDDING_MODEL = "models/gemini-embedding-2": Sử dụng mô hình embedding của Gemini API để tính toán nhanh chóng
-# trên đám mây, tránh việc tải mô hình 2GB về chạy CPU local quá chậm.
-EMBEDDING_MODEL = "models/gemini-embedding-2"
+# EMBEDDING_MODEL = "text-embedding-3-small": Sử dụng mô hình embedding của OpenAI.
+EMBEDDING_MODEL = "text-embedding-3-small"
 
-# models/gemini-embedding-2 sinh vector embedding có số chiều mặc định là 3072.
-EMBEDDING_DIM = 3072
+# models/text-embedding-3-small sinh vector embedding có số chiều là 1536.
+EMBEDDING_DIM = 1536
 
 # VECTOR_STORE = "weaviate": Sử dụng Weaviate chạy local qua Docker để hỗ trợ tìm kiếm kết hợp Hybrid Search (dense + sparse)
 # nguyên bản (built-in) chất lượng cao.
@@ -139,29 +138,29 @@ def embed_chunks(chunks: list[dict]) -> list[dict]:
         Mỗi chunk dict được thêm key 'embedding': list[float]
     """
     import os
-    import google.generativeai as genai
+    from openai import OpenAI
     from dotenv import load_dotenv
 
     load_dotenv()
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     texts = [c["content"] for c in chunks]
     
-    # Chia nhỏ thành các batch 100 để tránh lỗi giới hạn kích thước payload của API
-    batch_size = 100
+    # Chia nhỏ thành các batch để an toàn
+    batch_size = 500
     embeddings = []
     
-    print(f"Starting Gemini embeddings generation for {len(texts)} chunks...")
+    print(f"Starting OpenAI embeddings generation for {len(texts)} chunks...")
     for i in range(0, len(texts), batch_size):
         batch_texts = texts[i:i + batch_size]
         print(f"  Embedding batch {i // batch_size + 1} / {(len(texts) - 1) // batch_size + 1}...")
         
-        result = genai.embed_content(
-            model=EMBEDDING_MODEL,
-            content=batch_texts,
-            task_type="retrieval_document"
+        response = client.embeddings.create(
+            input=batch_texts,
+            model=EMBEDDING_MODEL
         )
-        embeddings.extend(result['embedding'])
+        for data in response.data:
+            embeddings.append(data.embedding)
 
     for chunk, emb in zip(chunks, embeddings):
         chunk["embedding"] = emb
@@ -172,7 +171,7 @@ def index_to_vectorstore(chunks: list[dict]):
     """
     Lưu chunks vào vector store đã chọn.
     """
-    with weaviate.connect_to_local() as client:
+    with weaviate.connect_to_local(port=8081, grpc_port=50052) as client:
         # Nếu collection đã tồn tại, xóa đi để tạo mới
         if client.collections.exists("DrugLawDocs"):
             client.collections.delete("DrugLawDocs")

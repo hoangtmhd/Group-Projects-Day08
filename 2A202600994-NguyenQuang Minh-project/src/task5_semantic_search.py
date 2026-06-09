@@ -13,7 +13,7 @@ Yêu cầu:
 import os
 import weaviate
 from weaviate.classes.query import MetadataQuery
-import google.generativeai as genai
+from openai import OpenAI
 from dotenv import load_dotenv
 
 
@@ -34,18 +34,17 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
         Sorted by score descending.
     """
     load_dotenv()
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     # Bước 1: Embed query bằng cùng model ở Task 4
-    result = genai.embed_content(
-        model="models/gemini-embedding-2",
-        content=query,
-        task_type="retrieval_query"
+    response = client_openai.embeddings.create(
+        input=[query],
+        model="text-embedding-3-small"
     )
-    query_embedding = result["embedding"]
+    query_embedding = response.data[0].embedding
 
     # Bước 2: Query vector store (cosine similarity)
-    with weaviate.connect_to_local() as client:
+    with weaviate.connect_to_local(port=8081, grpc_port=50052) as client:
         collection = client.collections.get("DrugLawDocs")
         
         results = collection.query.near_vector(

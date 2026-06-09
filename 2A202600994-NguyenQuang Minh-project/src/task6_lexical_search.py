@@ -47,7 +47,7 @@ def lexical_search(query: str, top_k: int = 10) -> list[dict]:
         }
         Sorted by score descending.
     """
-    with weaviate.connect_to_local() as client:
+    with weaviate.connect_to_local(port=8081, grpc_port=50052) as client:
         collection = client.collections.get("DrugLawDocs")
         
         # Thực hiện tìm kiếm BM25 trên Weaviate
